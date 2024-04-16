@@ -5,8 +5,10 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import os
 from dotenv import load_dotenv
+
 from utils import *
 from apscheduler.schedulers.background import BackgroundScheduler
+
 
 load_dotenv() 
 
@@ -106,6 +108,7 @@ def create_user_and_verify_email(email, password):
     except Exception as e:
         print("Error creating user and verifying email:", e)
         return False
+
     
 @app.route("/air_quality/threshold/<user_id>", methods = ["GET", "POST"])
 def threshold(user_id):
