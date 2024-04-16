@@ -1,18 +1,32 @@
 from flask import Flask, session, render_template, request, redirect
-
+import atexit
 import pyrebase
 import firebase_admin
 from firebase_admin import credentials, firestore
 import os
 from dotenv import load_dotenv
 from utils import *
-
+from apscheduler.schedulers.background import BackgroundScheduler
 
 load_dotenv() 
 
 
 
 app = Flask(__name__, static_url_path='/static')
+
+
+def check_thresholds_and_alert():
+    print("Cron Job running")
+
+scheduler = BackgroundScheduler()
+
+
+scheduler.start()
+
+
+scheduler.add_job(check_thresholds_and_alert, trigger="interval", seconds=3)
+
+
 
 
 config = {
