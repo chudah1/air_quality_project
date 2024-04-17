@@ -116,7 +116,10 @@ def threshold(user_id):
         location = request.form.get("location")
         threshold = request.form.get("threshold")
         thresholds = {"location":location, "threshold":threshold}
-        users.doc(user_id).update({"thresholds": firestore.ArrayUnion([thresholds])})
+        users.document(user_id).update({"thresholds": firestore.ArrayUnion([thresholds])})
+
+        return "Successfully created"
+    return "Could not set threshold"
 
 if __name__ == "__main__":
     app.run(debug=True)
