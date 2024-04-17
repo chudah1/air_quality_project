@@ -1,5 +1,5 @@
 from flask import Flask, session, render_template, request, redirect
-
+import atexit
 import pyrebase
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -82,7 +82,6 @@ def login():
 def logout():
     session.pop('user')
     return redirect('/air_quality/login')
-
 
 def create_user_and_verify_email(email, password):
     try:

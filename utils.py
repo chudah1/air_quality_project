@@ -1,6 +1,6 @@
 import requests
 import io
-
+import smtplib
 import os
 from dotenv import load_dotenv
 # importing geopy library and Nominatim class
@@ -120,5 +120,24 @@ def fetch_air_quality(location):
         location,
         include_health_suggestion=True,
         include_additional_pollutant_info=True
-)
+)   
     return current_conditions_data['indexes'][0]['aqiDisplay']
+
+
+
+
+
+
+def send_emails(email, location, air_quality):
+    subject = "Air Quality Threshold reached"
+    smtpServer = "smtp.gmail.com"
+    port = 587
+    senderEmail ="referency85@gmail.com"
+    senderPassword = os.getenv('EMAIL_PASSWORD')
+    server = smtplib.SMTP(smtpServer, port)
+    server.starttls()
+    server.login(senderEmail, senderPassword)
+    body = f"Alert: Air quality in {location} {air_quality} exceeds threshold for user {email}"
+    message = f'Subject: {subject}\n\n{body}'
+    server.sendmail(senderEmail, email, message)
+    server.quit()
