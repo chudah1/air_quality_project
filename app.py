@@ -83,6 +83,10 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 users= db.collection("users")
 
+@app.route('/')
+def index():
+    return redirect(url_for('home'))
+
 
 @app.route('/air_quality/home')
 def home():
