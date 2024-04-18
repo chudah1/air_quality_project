@@ -5,13 +5,24 @@ import os
 from dotenv import load_dotenv
 # importing geopy library and Nominatim class
 from geopy.geocoders import Nominatim
+
+from datetime import datetime, timedelta
+import random
+
+# Config file with some unwieldy variables defined
+import config 
+
 load_dotenv() 
+
+
+
+    
 
 
 def current_conditions(
     client,
     location,
-    include_local_AQI=True,
+    include_local_AQI=False,
     include_health_suggestion=False,
     include_all_pollutants=True,
     include_additional_pollutant_info=False,
@@ -140,6 +151,124 @@ def fetch_air_quality_queries(location):
         include_all_pollutants=True
 )   
     return current_conditions_data
+
+def hourly_conditions(client,
+                      location,
+                      datetime):
+    """Get condition data for a particular hour"""
+    
+    params = {}
+
+    params["dateTime"] = datetime
+
+
+    if isinstance(location, dict):
+        params["location"] = location
+    else:
+        raise ValueError(
+            "Location argument must be a dictionary containing latitude and longitude"
+        )
+    
+    return client.request_post("/v1/history:lookup", params)
+
+
+# Get air quality data for the last 30 days for an African country
+def get_african_history():
+    #gET current date
+    #create a loop that goes back one day 30 times
+    #put aqi values into a list. 
+    #Put list into a dictionary with key as country
+    country = random.choice(config.african_countries)
+
+
+    current_datetime = datetime.now()
+    current_datetime = current_datetime - timedelta(days = 1)
+    iso_current_datetime = current_datetime.isoformat() + "Z"
+
+
+
+    country_trend_data = {}
+    country_trend_data[country] = []
+
+    for i in range(30):
+        # print(i, ". ", iso_current_datetime)
+        location = get_location_coordinates(country)
+
+        # print("LOCATION CHANGED - ", location)
+
+        hourly_conditions_data = hourly_conditions(
+            client,
+            location,
+            iso_current_datetime
+        )   
+        # country_trend_data[country] = hourly_conditions_data
+
+        current_datetime = current_datetime - timedelta(days = 1)
+        iso_current_datetime = current_datetime.isoformat() + "Z"
+
+        country_trend_data[country].append(hourly_conditions_data["hoursInfo"][0]["indexes"][0]["aqiDisplay"])
+    # country_trend_data[country] = hourly_conditions_data[country]['hoursInfo'][1]["indexes"][0]["aqiDisplay"]
+    # print("Country Trend data")
+    # print(country_trend_data)
+    return country_trend_data
+
+
+def get_common_air_pollutant():
+    pollutant_list = []
+
+    for country in config.african_countries:
+        if country == "Algeria":
+            continue
+        location = get_location_coordinates(country)
+
+        # print("LOCATION CHANGED - ", location)
+
+        current_conditions_data = current_conditions(
+            client,
+            location,
+        )   
+
+
+        pollutant_list.append(current_conditions_data["indexes"][0]["dominantPollutant"])
+        
+
+        # count
+    most_common_pollutant = max(set(pollutant_list), key = pollutant_list.count)
+    return str(most_common_pollutant)
+
+
+def get_common_air_quality():
+    air_quality_list = []
+
+    for country in config.african_countries:
+        if country == "Algeria":
+            continue
+        location = get_location_coordinates(country)
+
+        # print("LOCATION CHANGED - ", location)
+
+        current_conditions_data = current_conditions(
+            client,
+            location,
+        )   
+
+
+        air_quality_list.append(current_conditions_data["indexes"][0]["category"])
+        
+
+        # count
+    most_common_pollutant = max(set(air_quality_list), key = air_quality_list.count)
+    return str(most_common_pollutant)
+
+
+
+
+
+
+
+
+
+
 
 
 

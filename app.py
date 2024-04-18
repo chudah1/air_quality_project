@@ -161,5 +161,39 @@ def fetch_air_quality_info():
     # return render_template('air_quality_info.html', data=air_quality_data,location = location)
     return air_quality_data
 
+
+
+
+@app.route('/air_quality/get_historical_trends', methods=['GET'])
+def get_countries_trend_data():
+    country_trends = get_african_history()
+    if not country_trends:
+        return jsonify({"error": "Could not fetch trend data"}), 500
+    
+    for country, trends in country_trends.items():
+        combined_dict = {"country": country, "air_quality_trends": trends}
+
+    return combined_dict
+
+
+@app.route('/air_quality/most_common_pollutant', methods=['GET'])
+def get_africa_pollutant_data():
+    pollutant_data = get_common_air_pollutant()
+    if not pollutant_data:
+        return jsonify({"error": "Could not fetch pollutant data"}), 500
+    return {"pollutant_data": pollutant_data}
+
+
+@app.route('/air_quality/most_common_air_quality', methods=['GET'])
+def get_africa_quality_data():
+    air_quality = get_common_air_quality()
+    if not air_quality:
+        return jsonify({"error": "Could not fetch pollutant data"}), 500
+    return {"air_quality": air_quality}
+
+
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)
