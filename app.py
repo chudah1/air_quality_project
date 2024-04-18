@@ -1,4 +1,4 @@
-from flask import Flask, session, render_template, request, redirect
+from flask import Flask, session, render_template, request, redirect, url_for
 import atexit
 import pyrebase
 import firebase_admin
@@ -38,7 +38,7 @@ scheduler = BackgroundScheduler()
 scheduler.start()
 
 
-scheduler.add_job(check_thresholds_and_alert, trigger="interval", minutes=1)
+scheduler.add_job(check_thresholds_and_alert, trigger="interval", hours=48)
 
 
 
@@ -83,16 +83,30 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 users= db.collection("users")
 
+
+@app.route('/air_quality/home')
+def home():
+    # Check if the user is logged in
+    if 'user' in session:
+        return render_template('index.html')
+    else:
+        return redirect(url_for('login'))
+
+
 @app.route('/air_quality/register', methods=['GET', 'POST'])
 def register():
     if (request.method == 'POST'):
             email = request.form.get('email')
             password = request.form.get('password')
             username = request.form.get('username')
-            auth.create_user_with_email_and_password(email, password)
-            users.add({"email":email, "username":username})
-            return "created user"
+            user = auth.create_user_with_email_and_password(email, password)
+            doc_ref = users.add({"email":email, "username":username})
+            doc_id = doc_ref[1].id
+            session['user'] = user
+            session['doc_id'] = doc_id
+            return redirect(url_for('home'))
     return render_template('authentication-register.html')
+
 
 @app.route("/air_quality/login", methods = ["GET", "POST"])
 def login():
@@ -102,7 +116,7 @@ def login():
         try:
             user = auth.sign_in_with_email_and_password(email, password)
             session['user'] = email
-            return "Login"
+            return render_template('index.html')
         except:
             return 'Wrong email or password'
     return render_template('authentication-login.html')
