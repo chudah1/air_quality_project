@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <h2>Set Threshold and Location</h2>
-        <form action="/submit" method="post">
+        <form action="/air_quality/threshold/{{ session['user_id'] }}" method="post">
             <div class="form-group">
                 <label for="threshold">Threshold:</label>
                 <input type="number" id="threshold" name="threshold" placeholder="Enter Threshold" required>

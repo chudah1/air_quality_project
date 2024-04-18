@@ -112,18 +112,39 @@ def register():
     return render_template('authentication-register.html')
 
 
-@app.route("/air_quality/login", methods = ["GET", "POST"])
+# @app.route("/air_quality/login", methods = ["GET", "POST"])
+# def login():
+#     if request.method == 'POST':
+#         email = request.form.get('email')
+#         password = request.form.get('password')
+#         try:
+#             user = auth.sign_in_with_email_and_password(email, password)
+#             session['user'] = email
+#             return render_template('index.html')
+#         except:
+#             return 'Wrong email or password'
+#     return render_template('authentication-login.html')
+
+
+@app.route("/air_quality/login", methods=["GET", "POST"])
 def login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
-        try:
-            user = auth.sign_in_with_email_and_password(email, password)
-            session['user'] = email
-            return render_template('index.html')
-        except:
+        
+        user = auth.sign_in_with_email_and_password(email, password)
+        # Fetch the user's document ID from Firestore
+        user_doc = users.where("email", "==", email).get()
+        if not user_doc:
             return 'Wrong email or password'
+        doc_id = user_doc[0].id
+        # Store email and doc_id in the session
+        session['user'] = email
+        session['doc_id'] = doc_id
+        return redirect(url_for('home'))
+        
     return render_template('authentication-login.html')
+
 
 @app.route("/air_quality/logout")
 def logout():
@@ -147,19 +168,23 @@ def threshold(user_id):
         threshold = request.form.get("threshold")
         thresholds = {"location":location, "threshold":threshold}
         users.document(user_id).update({"thresholds": firestore.ArrayUnion([thresholds])})
-        return render_template("threshold.html", message="Threshold set successfully")
-    return render_template("threshold.html")
+        return render_template('index.html', message="Threshold added successfully")
+    return render_template('index.html')
 
-@app.route('/air_quality/fetch-air-quality-info', methods=['POST'])
+@app.route('/air_quality/fetch_air_quality_queries', methods=['GET','POST'])
 def fetch_air_quality_info():
-    location = request.form.get('location')
-    if not location:
-        return jsonify({"error": "Location parameter is missing or invalid"}), 400
-    air_quality_data = fetch_air_quality_queries(location)
-    if not air_quality_data:
-        return jsonify({"error": "Could not fetch air quality data"}), 500
-    # return render_template('air_quality_info.html', data=air_quality_data,location = location)
-    return air_quality_data
+    if request.method == 'POST':
+        data = request.json
+        location = data.get('location')
+        if not location:
+            return jsonify({"error": "Location parameter is missing or invalid"}), 400
+        air_quality_data = fetch_air_quality_queries(location)
+        if not air_quality_data:
+            return jsonify({"error": "Could not fetch air quality data"}), 500
+        return jsonify(air_quality_data)
+    return render_template('air_quality_query.html')
+
+
 
 
 
@@ -196,4 +221,4 @@ def get_africa_quality_data():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0')
