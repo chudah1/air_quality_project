@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Air Quality Dashboard</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        font-family: "Arial", sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      header {
+        background-color: #0056b3;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        border-radius: 8px 8px 0 0;
+      }
+
+      main {
+        padding: 20px;
+        text-align: center;
+      }
+
+      .form-container {
+        background: #e8ecef;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+
+      input[type="text"] {
+        padding: 10px;
+        width: 70%;
+        margin-right: 10px;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #218838;
+      }
+
+      .results {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        /* display: none; Initially hide results */
+        text-align: left;
+      }
+
+      .results.active {
+        display: block; /* Show results when updated */
+      }
+
+      .error {
+        color: #dc3545;
+        margin-top: 20px;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          width: 95%;
+          margin: 10px auto;
+        }
+
+        input[type="text"],
+        button {
+          width: 100%;
+          margin-top: 10px;
+        }
+
+        input[type="text"] {
+          margin-right: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Air Quality Dashboard</h1>
+      </header>
+      <main>
+        <div class="form-container">
+          <!-- <form action="{{ url_for('fetch_air_quality_info') }}" method="POST"> -->
+          <form
+            action="/air_quality/fetch_air_quality_queries"
+            method="POST"
+            onsubmit="event.preventDefault(); fetchAirQuality(this.location.value);"
+          >
+            <input
+              type="text"
+              name="location"
+              placeholder="Enter a location"
+              required
+            />
+            <button type="submit">Check Air Quality</button>
+          </form>
+        </div>
+        <!-- Optional: display results here if this is the same page for results -->
+        <div id="results" class="results"></div>
+        <div id="health-recommendations" class="results"></div>
+      </main>
+    </div>
+
+    <script>
+      function fetchAirQuality(location) {
+        console.log("Location:", location); 
+        fetch("/air_quality/fetch_air_quality_queries", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ location: location }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            displayAirQuality(data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+
+      function displayAirQuality(data) {
+        // Display health recommendations
+        var healthRecommendations = data.healthRecommendations;
+        var healthRecommendationsDiv = document.getElementById('health-recommendations');
+        healthRecommendationsDiv.innerHTML = "<h2>Health Recommendations</h2>";
+        for (var key in healthRecommendations) {
+            if (healthRecommendations.hasOwnProperty(key)) {
+                healthRecommendationsDiv.innerHTML += "<p><strong>" + key + ":</strong> " + healthRecommendations[key] + "</p>";
+            }
+        }
+
+        // Display AQI and pollutants
+        var indexes = data.indexes;
+        var pollutants = data.pollutants;
+
+        var resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = "<h2>Results</h2>";
+
+        resultsDiv.innerHTML += "<h3>Air Quality Index (AQI)</h3>";
+        indexes.forEach(function(index) {
+            resultsDiv.innerHTML += "<p><strong>" + index.displayName + ":</strong> " + index.aqiDisplay + " (" + index.category + ")</p>";
+        });
+
+        resultsDiv.innerHTML += "<h3>Pollutants</h3>";
+        pollutants.forEach(function(pollutant) {
+            resultsDiv.innerHTML += "<p><strong>" + pollutant.displayName + ":</strong> " + pollutant.concentration.value + " " + pollutant.concentration.units + "</p>";
+    });
+}
+
+    </script>
+  </body>
+</html>
