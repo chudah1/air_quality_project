@@ -124,7 +124,22 @@ def fetch_air_quality(location):
     return current_conditions_data['indexes'][0]['aqiDisplay']
 
 
-
+def fetch_air_quality_queries(location):
+    location = get_location_coordinates(location)
+    if not location:
+        print("Location parameter is missing or invalid")
+        
+    print("location", location)
+    current_conditions_data = current_conditions(
+        client,
+        location,
+        include_health_suggestion=True,
+        include_local_AQI=False,
+        include_additional_pollutant_info=False,
+        include_dominent_pollutant_conc=True,
+        include_all_pollutants=True
+)   
+    return current_conditions_data
 
 
 

@@ -1,4 +1,4 @@
-from flask import Flask, session, render_template, request, redirect, url_for
+from flask import Flask, session, render_template, request, redirect, url_for, jsonify
 import atexit
 import pyrebase
 import firebase_admin
@@ -147,9 +147,19 @@ def threshold(user_id):
         threshold = request.form.get("threshold")
         thresholds = {"location":location, "threshold":threshold}
         users.document(user_id).update({"thresholds": firestore.ArrayUnion([thresholds])})
+        return render_template("threshold.html", message="Threshold set successfully")
+    return render_template("threshold.html")
 
-        return "Successfully created"
-    return "Could not set threshold"
+@app.route('/air_quality/fetch-air-quality-info', methods=['POST'])
+def fetch_air_quality_info():
+    location = request.form.get('location')
+    if not location:
+        return jsonify({"error": "Location parameter is missing or invalid"}), 400
+    air_quality_data = fetch_air_quality_queries(location)
+    if not air_quality_data:
+        return jsonify({"error": "Could not fetch air quality data"}), 500
+    # return render_template('air_quality_info.html', data=air_quality_data,location = location)
+    return air_quality_data
 
 if __name__ == "__main__":
     app.run(debug=True)

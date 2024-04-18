@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threshold and Location Form</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/threshold.css')}}">
+</head>
+<body>
+    <div class="container">
+        <h2>Set Threshold and Location</h2>
+        <form action="/submit" method="post">
+            <div class="form-group">
+                <label for="threshold">Threshold:</label>
+                <input type="number" id="threshold" name="threshold" placeholder="Enter Threshold" required>
+            </div>
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" id="location" name="location" placeholder="Enter Location" required>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
