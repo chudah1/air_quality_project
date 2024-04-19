@@ -14,7 +14,7 @@ COPY . .
 # Install any dependencies specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose port 80 to the outside world
+# Expose port 5000 to the outside world
 EXPOSE 5000
 
 # Command to run the Flask application

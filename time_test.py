@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta
 import config
 import random
+import requests
+import json
+
 # Get air quality data for the last 30 days for an African country
 def get_African_history(country):
     #gET current date
@@ -32,9 +35,42 @@ def get_African_history(country):
         include_all_pollutants=True
     )   
 
+def new_get_location_coordinates(country):
+    url = config.geolocator_url
+    geolocator_query = f"q={country}"
+    api_key = config.geolocator_api_key
+
+    coordinates_url = url+geolocator_query + api_key
     
+    try:
+        response = requests.get(coordinates_url)
+        if(response.status_code == 200):
+            result = response.json()
+
+            country_coordinates = result["results"][0]["geometry"]["location"]
+            latitude = country_coordinates["lat"]
+            longitude = country_coordinates["lng"]
+
+            # result = json.loads(result)
+            # print(country_coordinates)
+            return {"longitude":longitude,"latitude":latitude}
+        else:
+            print("Exception occurred here")
+            return None
+    except Exception as e:
+        print("Exception occurred ", e)
+        return None
+
 
 
 country = random.choice(config.african_countries)
-# print(country)
-get_African_history(country)
+print(country)
+# get_African_history(country)
+# Use the get_request function to fetch location coordinates
+location_data = new_get_location_coordinates(country)
+if location_data:
+    print("Location Data:", location_data)
+else:
+    print("Failed to fetch location data")
+
+

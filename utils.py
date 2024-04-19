@@ -38,6 +38,7 @@ def current_conditions(
     if isinstance(location, dict):
         params["location"] = location
     else:
+        print(location)
         raise ValueError(
             "Location argument must be a dictionary containing latitude and longitude"
         )
@@ -124,6 +125,37 @@ def get_location_coordinates(location):
     return {"longitude":longitude,"latitude":latitude}
 
 
+def africa_get_location_coordinates(country):
+    return config.country_coordinates[country]
+
+
+    # url = config.geolocator_url
+    # geolocator_query = f"q={country}"
+    # api_key = config.geolocator_api_key
+
+    # coordinates_url = url+geolocator_query + api_key
+    
+    # try:
+    #     response = requests.get(coordinates_url)
+    #     if(response.status_code == 200):
+    #         result = response.json()
+
+    #         country_coordinates = result["results"][0]["geometry"]["location"]
+    #         latitude = country_coordinates["lat"]
+    #         longitude = country_coordinates["lng"]
+
+    #         # result = json.loads(result)
+    #         # print(country_coordinates)
+    #         return {"longitude":longitude,"latitude":latitude}
+    #     else:
+    #         print("Exception occurred")
+    #         return None
+    # except Exception as e:
+    #     print("Exception occurred ", e)
+    #     return None
+
+
+
 def fetch_air_quality(location):
     location = get_location_coordinates(location)
     current_conditions_data = current_conditions(
@@ -192,9 +224,9 @@ def get_african_history():
 
     for i in range(30):
         # print(i, ". ", iso_current_datetime)
-        location = get_location_coordinates(country)
+        location = africa_get_location_coordinates(country)
 
-        # print("LOCATION CHANGED - ", location)
+        print("LOCATION CHANGED - ", location)
 
         hourly_conditions_data = hourly_conditions(
             client,
@@ -219,17 +251,21 @@ def get_common_air_pollutant():
     for country in config.african_countries:
         if country == "Algeria":
             continue
-        location = get_location_coordinates(country)
+
+        location = africa_get_location_coordinates(country)
 
         # print("LOCATION CHANGED - ", location)
 
         current_conditions_data = current_conditions(
             client,
-            location,
+            location
         )   
 
+        if(len(current_conditions_data) == 3):
+            print(current_conditions_data)
 
-        pollutant_list.append(current_conditions_data["indexes"][0]["dominantPollutant"])
+            continue
+        pollutant_list.append(current_conditions_data['indexes'][0]["dominantPollutant"])
         
 
         # count
@@ -243,7 +279,7 @@ def get_common_air_quality():
     for country in config.african_countries:
         if country == "Algeria":
             continue
-        location = get_location_coordinates(country)
+        location = africa_get_location_coordinates(country)
 
         # print("LOCATION CHANGED - ", location)
 
@@ -251,6 +287,11 @@ def get_common_air_quality():
             client,
             location,
         )   
+
+        if(len(current_conditions_data) == 3):
+            print(current_conditions_data)
+
+            continue
 
 
         air_quality_list.append(current_conditions_data["indexes"][0]["category"])

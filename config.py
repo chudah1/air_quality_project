@@ -117,3 +117,17 @@ air_quality_scores_mapping = {
     (1, 19): "Poor air quality",
     (0, 0): "Poor air quality"
 }
+
+geolocator_url = "https://geokeo.com/geocode/v1/search.php?"
+geolocator_api_key = "&api=6f467375b3db3e1a103cbf0319573751"
+
+country_coordinates = {
+    "Egypt": {'longitude': '29.267546900000003', 'latitude': '26.254049300138135'},
+    "South Africa": {'longitude': '24.991639', 'latitude': '-28.8166235993549'},
+    "Mauritius": {'longitude': '58.126105731092494', 'latitude': '-17.6454160277693'},
+    "Kenya": {'longitude': '38.4313975', 'latitude': '1.4419682998467824'},
+    "Algeria": {'longitude': '2.6801757350923383', 'latitude': '28.538447863315337'},
+    "Ethiopia": {'longitude': '39.61516097486015', 'latitude': '8.667239901582057'},
+    "Uganda": {'longitude': '32.21665779999999', 'latitude': '1.5333553998369125'},
+    "Morocco":{'longitude': '-8.510479254510354', 'latitude': '29.969579357850378'}
+}
